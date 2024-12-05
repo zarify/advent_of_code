@@ -29,16 +29,25 @@ print(f"Part A: {totalA}")
 totalB = 0
 
 
-# there's definitely a nicer way to sort this :)
 def sort_update(pages, rules):
-    while not is_sorted(pages, rules):
-        for before, after in rules:
-            if before not in pages or after not in pages:
-                continue
-            before_idx, after_idx = pages.index(before), pages.index(after)
-            if before_idx > after_idx:
-                pages.insert(after_idx, before)
-                pages.pop(before_idx + 1)
+    # strip unnecessary rules for this update
+    u_rules = [(b, a) for b, a in rules if a in pages and b in pages]
+    for first, second in u_rules:
+        first_idx, second_idx = pages.index(first), pages.index(second)
+        if first_idx > second_idx:
+            # find the lowest matching index that uses the first number
+            # and insert
+            new_pos = min(
+                [
+                    pages.index(r_second)
+                    for r_first, r_second in u_rules
+                    if r_first == first
+                ]
+            )
+            # shift the first number to the new position
+            # and pop the old value from its (+1) position
+            pages.insert(new_pos, first)
+            pages.pop(first_idx + 1)
     return pages[len(pages) // 2]
 
 
