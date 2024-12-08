@@ -24,19 +24,20 @@ for i, v in enumerate(data):
     guard_area[(r, c)] = v
 
 
-def traverse(pos, g, guard_area, loop_detect=False, self_modify=False):
+def traverse(pos, g, guard_area, loop_detect=False):
     """
     Feel a bit dirty for returning ints in different contexts.
     If loop detection is set, return 1 for a loop and 0 for no loop.
     Otherwise return the number of unique positions in the path
     """
     seen = set()
-    loop_walls = 0
     while pos[0] in range(height) and pos[1] in range(width):
+        # keep track of facings if we're doing loop detection, otherwise
+        # just unique positions
         seen.add(pos if not loop_detect else (pos, g))
         new_pos = (pos[0] + g[0], pos[1] + g[1])
         if new_pos not in guard_area:
-            break
+            break  # escaped the area
         if guard_area[new_pos] == "#":
             g = f[g]
         else:
@@ -44,11 +45,9 @@ def traverse(pos, g, guard_area, loop_detect=False, self_modify=False):
         # check if our new position and facing is already in our history
         if loop_detect and (pos, g) in seen:
             return 1
-    if self_modify:
-        return loop_walls
     if not loop_detect:
         return len(seen)
-    return 0
+    return 0  # no loop, escaped, don't contribute to score
 
 
 # Part A
