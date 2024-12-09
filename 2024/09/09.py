@@ -15,29 +15,31 @@ def defrag(files, spaces):
     files = deque(files)
     assembled = [files.popleft()]
     while spaces and files:
+        # avail is the number of spaces available in the current run of free space
         avail = spaces.popleft()
+        # sometimes we have 0 spaces, we want to add the next run of blocks to the
+        # assembled list if so
         if avail == 0:
             assembled.append(files.popleft())
-        # avail is the number of spaces available, idx contains
-        # the insertion point into `spaces`, which will continue to
-        # be a deque of [file_id, amount] lists
         # determine how much to prune from the end of files
         while avail > 0 and files:
             last_run = files[-1][1]  # length of the last run of numbers
             # do we have space to put the whole run?
             if last_run <= avail:
-                # pop off the last set of values, reduce the available space
-                # count, and add it to the move list
+                # pop off the last set of values, reduce the available space count
                 nxt = files.pop()
                 avail -= last_run
                 assembled.append(nxt)
             else:
-                # split the run
+                # split the run and reduce the count of the final block count
                 files[-1][1] -= avail
                 assembled.append([files[-1][0], avail])
                 avail = 0
+            # used up all of the run of free space, put the next block of files
+            # onto the assembled list
             if avail == 0:
                 assembled.append(files.popleft())
+    # if we have used all available spaces but there are files left, assemble them
     while files:
         assembled.append(files.popleft())
     return assembled
