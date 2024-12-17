@@ -1,5 +1,3 @@
-from collections import deque
-
 with open("input") as f:
     data = f.read().strip().split("\n")
 
