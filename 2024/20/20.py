@@ -33,7 +33,7 @@ def calc_offsets(d):
     for x in range(0, d + 1):
         for y in range(0, d + 1):
             cost = abs(x) + abs(y)
-            if cost > d or (x == 0 and y == 0):
+            if cost > d or cost < 2:
                 continue
             offsets.add((-x, y, cost))
             offsets.add((x, y, cost))
