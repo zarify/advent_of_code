@@ -1,5 +1,6 @@
 from collections import deque
 from collections import namedtuple
+from functools import cache
 
 data = """029A
 980A
@@ -79,20 +80,61 @@ def explore(code, mtype):
     return paths
 
 
-# Part A
-depth = 2
+# (from, to): resulting_dpad_path
+d_moves = {
+    ("A", "A"): "A",
+    ("^", "^"): "A",
+    (">", ">"): "A",
+    ("v", "v"): "A",
+    ("<", "<"): "A",
+    ("A", "^"): "<A",
+    ("^", "A"): ">A",
+    ("A", ">"): "vA",
+    (">", "A"): "^A",
+    ("v", "^"): "^A",
+    ("^", "v"): "vA",
+    ("v", "<"): "<A",
+    ("<", "v"): ">A",
+    ("v", ">"): ">A",
+    (">", "v"): "<A",
+    ("A", "v"): "<vA",
+    ("v", "A"): "^>A",
+    ("A", "<"): "v<<A",
+    ("<", "A"): ">>^A",
+    (">", "<"): "<<A",
+    ("<", ">"): ">>A",
+    ("<", "^"): ">^A",
+    ("^", "<"): "v<A",
+    (">", "^"): "<^A",
+    ("^", ">"): "v>A",
+}
 
-total = 0
+
+@cache
+def expand(path, depth):
+    prev = "A"
+    transitions = {}
+    for c in path:
+        transitions[(prev, c)] = transitions.get((prev, c), 0) + 1
+        prev = c
+    if depth == 1:
+        return sum([len(d_moves[k]) * v for k, v in transitions.items()])
+    else:
+        total = 0
+        total += sum(
+            [expand(d_moves[k], depth - 1) * v for k, v in transitions.items()]
+        )
+        return total
+
+
+total_2 = 0
+total_25 = 0
 for code in realdata:
     paths = explore(code, "num")
-    for i in range(depth):
-        seen = set()
-        for p in paths:
-            seen.update(set(explore(p, "dir")))
-        ms = min([len(s) for s in seen])
-        paths = [s for s in seen if len(s) == ms]
+    path_val_2 = min([expand(p, 2) for p in paths])
+    path_val_25 = min([expand(p, 25) for p in paths])
     code_val = int(code.rstrip("A"))
-    path_val = len(paths[0])
-    total += code_val * path_val
-    print(f"{code} = {code_val} * {path_val} = {code_val * path_val}")
-print(f"Part A: {total}")
+    total_2 += code_val * path_val_2
+    total_25 += code_val * path_val_25
+print(f"Part A: {total_2}")
+print(f"Part B: {total_25}")
